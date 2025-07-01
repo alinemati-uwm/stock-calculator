@@ -7,11 +7,17 @@ import { StockMetricsChart } from "../../../shared/components/charts/StockMetric
 import { useStockMetrics } from "../hooks/useStockMetrics"
 
 export function StockMetricsTab() {
-  const { inputs, results, error, handleInputChange, handleSubmit, handleReset } = useStockMetrics()
+  const { inputs, results, error, isCalculating, handleInputChange, handleSubmit, handleReset } = useStockMetrics()
 
   return (
     <>
-      <StockInputForm inputs={inputs} onInputChange={handleInputChange} onSubmit={handleSubmit} onReset={handleReset} />
+      <StockInputForm
+        inputs={inputs}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        isCalculating={isCalculating}
+      />
       {error && <ErrorDisplay error={error} />}
       {results && (
         <>

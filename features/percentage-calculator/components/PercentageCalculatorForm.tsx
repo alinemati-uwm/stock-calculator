@@ -7,16 +7,30 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InfoPopup } from "../../../shared/components/ui/info-popup"
+import { TooltipHelper } from "../../../shared/components/ui/tooltip-helper"
 import type { PercentageInputs } from "../types"
+import { Loader2 } from "lucide-react"
+
+const fieldTooltips = {
+  initialValue: "The starting value for the calculation.",
+  finalValue: "The ending value for the calculation.",
+}
 
 interface PercentageCalculatorFormProps {
   inputs: PercentageInputs
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent) => void
   onReset: () => void
+  isCalculating?: boolean
 }
 
-export function PercentageCalculatorForm({ inputs, onInputChange, onSubmit, onReset }: PercentageCalculatorFormProps) {
+export function PercentageCalculatorForm({
+  inputs,
+  onInputChange,
+  onSubmit,
+  onReset,
+  isCalculating = false,
+}: PercentageCalculatorFormProps) {
   const infoData = {
     title: "Percentage Change Calculator",
     description:
@@ -49,7 +63,10 @@ export function PercentageCalculatorForm({ inputs, onInputChange, onSubmit, onRe
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="initialValue">Initial Value</Label>
+            <Label htmlFor="initialValue" className="flex items-center gap-2">
+              Initial Value
+              <TooltipHelper content={fieldTooltips.initialValue} showIcon />
+            </Label>
             <Input
               id="initialValue"
               name="initialValue"
@@ -58,10 +75,14 @@ export function PercentageCalculatorForm({ inputs, onInputChange, onSubmit, onRe
               onChange={onInputChange}
               placeholder="Enter initial value (e.g., 100)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="finalValue">Final Value</Label>
+            <Label htmlFor="finalValue" className="flex items-center gap-2">
+              Final Value
+              <TooltipHelper content={fieldTooltips.finalValue} showIcon />
+            </Label>
             <Input
               id="finalValue"
               name="finalValue"
@@ -71,13 +92,27 @@ export function PercentageCalculatorForm({ inputs, onInputChange, onSubmit, onRe
               step="0.01"
               placeholder="Enter final value (e.g., 85)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="flex space-x-4">
-            <Button type="submit">Calculate</Button>
-            <Button type="button" variant="outline" onClick={onReset}>
-              Reset
-            </Button>
+            <TooltipHelper content="Calculate the percentage change between initial and final values">
+              <Button type="submit" disabled={isCalculating}>
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Calculating...
+                  </>
+                ) : (
+                  "Calculate"
+                )}
+              </Button>
+            </TooltipHelper>
+            <TooltipHelper content="Clear all fields and start over">
+              <Button type="button" variant="outline" onClick={onReset} disabled={isCalculating}>
+                Reset
+              </Button>
+            </TooltipHelper>
           </div>
         </form>
       </CardContent>

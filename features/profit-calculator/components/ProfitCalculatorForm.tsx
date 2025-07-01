@@ -7,16 +7,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InfoPopup } from "../../../shared/components/ui/info-popup"
+import { TooltipHelper } from "../../../shared/components/ui/tooltip-helper"
 import type { ProfitInputs } from "../types"
+import { Loader2 } from "lucide-react"
 
 interface ProfitCalculatorFormProps {
   inputs: ProfitInputs
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent) => void
   onReset: () => void
+  isCalculating?: boolean
 }
 
-export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset }: ProfitCalculatorFormProps) {
+export function ProfitCalculatorForm({
+  inputs,
+  onInputChange,
+  onSubmit,
+  onReset,
+  isCalculating = false,
+}: ProfitCalculatorFormProps) {
   const infoData = {
     title: "Profit Calculator",
     description: "Calculate your potential profit or loss from stock trades with automatic percentage calculations",
@@ -39,6 +48,14 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
     },
   }
 
+  const fieldTooltips = {
+    shares: "Total number of shares you own or plan to buy. This determines the scale of your investment.",
+    buyPrice: "The price per share you paid when purchasing the stock. Used to calculate your cost basis.",
+    sellPrice: "The price per share you plan to sell at. Leave empty if you want to use profit percentage instead.",
+    profitPercentage:
+      "Your desired profit percentage. Leave empty if you want to use sell price instead. The calculator will auto-fill the missing value.",
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -51,7 +68,10 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="shares">Number of Shares</Label>
+            <Label htmlFor="shares" className="flex items-center gap-2">
+              Number of Shares
+              <TooltipHelper content={fieldTooltips.shares} showIcon />
+            </Label>
             <Input
               id="shares"
               name="shares"
@@ -60,10 +80,14 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
               onChange={onInputChange}
               placeholder="Enter number of shares (e.g., 100)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="buyPrice">Buy Price</Label>
+            <Label htmlFor="buyPrice" className="flex items-center gap-2">
+              Buy Price
+              <TooltipHelper content={fieldTooltips.buyPrice} showIcon />
+            </Label>
             <Input
               id="buyPrice"
               name="buyPrice"
@@ -73,10 +97,14 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
               step="0.01"
               placeholder="Enter buy price (e.g., 200)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sellPrice">Sell Price</Label>
+            <Label htmlFor="sellPrice" className="flex items-center gap-2">
+              Sell Price
+              <TooltipHelper content={fieldTooltips.sellPrice} showIcon />
+            </Label>
             <Input
               id="sellPrice"
               name="sellPrice"
@@ -86,10 +114,14 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
               step="0.01"
               placeholder="Enter sell price (e.g., 220)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="profitPercentage">Profit Percentage</Label>
+            <Label htmlFor="profitPercentage" className="flex items-center gap-2">
+              Profit Percentage
+              <TooltipHelper content={fieldTooltips.profitPercentage} showIcon />
+            </Label>
             <Input
               id="profitPercentage"
               name="profitPercentage"
@@ -99,13 +131,27 @@ export function ProfitCalculatorForm({ inputs, onInputChange, onSubmit, onReset 
               step="0.01"
               placeholder="Enter desired profit percentage (e.g., 10)"
               className="placeholder:text-muted-foreground placeholder:opacity-50"
+              disabled={isCalculating}
             />
           </div>
           <div className="flex space-x-4">
-            <Button type="submit">Calculate</Button>
-            <Button type="button" variant="outline" onClick={onReset}>
-              Reset
-            </Button>
+            <TooltipHelper content="Calculate profit/loss based on your inputs">
+              <Button type="submit" disabled={isCalculating}>
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Calculating...
+                  </>
+                ) : (
+                  "Calculate"
+                )}
+              </Button>
+            </TooltipHelper>
+            <TooltipHelper content="Clear all fields and start over">
+              <Button type="button" variant="outline" onClick={onReset} disabled={isCalculating}>
+                Reset
+              </Button>
+            </TooltipHelper>
           </div>
         </form>
       </CardContent>

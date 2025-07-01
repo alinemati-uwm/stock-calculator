@@ -7,16 +7,32 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InfoPopup } from "../../../shared/components/ui/info-popup"
+import { TooltipHelper } from "../../../shared/components/ui/tooltip-helper"
 import type { AverageInputs } from "../types"
+import { Loader2 } from "lucide-react"
+
+const fieldTooltips = {
+  currentShares: "Enter the number of shares you currently own.",
+  currentAverage: "Enter the average price per share of your current holdings.",
+  newShares: "Enter the number of new shares you plan to buy.",
+  newPrice: "Enter the price per share for the new purchase.",
+}
 
 interface AverageCalculatorFormProps {
   inputs: AverageInputs
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent) => void
   onReset: () => void
+  isCalculating?: boolean
 }
 
-export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset }: AverageCalculatorFormProps) {
+export function AverageCalculatorForm({
+  inputs,
+  onInputChange,
+  onSubmit,
+  onReset,
+  isCalculating = false,
+}: AverageCalculatorFormProps) {
   const infoData = {
     title: "Average Price Calculator",
     description:
@@ -53,7 +69,10 @@ export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="currentShares">Current Shares</Label>
+              <Label htmlFor="currentShares" className="flex items-center gap-2">
+                Current Shares
+                <TooltipHelper content={fieldTooltips.currentShares} showIcon />
+              </Label>
               <Input
                 id="currentShares"
                 name="currentShares"
@@ -61,10 +80,14 @@ export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset
                 value={inputs.currentShares}
                 onChange={onInputChange}
                 placeholder="e.g., 400"
+                disabled={isCalculating}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currentAverage">Current Average Price</Label>
+              <Label htmlFor="currentAverage" className="flex items-center gap-2">
+                Current Average Price
+                <TooltipHelper content={fieldTooltips.currentAverage} showIcon />
+              </Label>
               <Input
                 id="currentAverage"
                 name="currentAverage"
@@ -73,10 +96,14 @@ export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset
                 onChange={onInputChange}
                 step="0.01"
                 placeholder="e.g., 320"
+                disabled={isCalculating}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="newShares">New Shares to Buy</Label>
+              <Label htmlFor="newShares" className="flex items-center gap-2">
+                New Shares to Buy
+                <TooltipHelper content={fieldTooltips.newShares} showIcon />
+              </Label>
               <Input
                 id="newShares"
                 name="newShares"
@@ -84,10 +111,14 @@ export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset
                 value={inputs.newShares}
                 onChange={onInputChange}
                 placeholder="e.g., 200"
+                disabled={isCalculating}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="newPrice">New Purchase Price</Label>
+              <Label htmlFor="newPrice" className="flex items-center gap-2">
+                New Purchase Price
+                <TooltipHelper content={fieldTooltips.newPrice} showIcon />
+              </Label>
               <Input
                 id="newPrice"
                 name="newPrice"
@@ -96,14 +127,28 @@ export function AverageCalculatorForm({ inputs, onInputChange, onSubmit, onReset
                 onChange={onInputChange}
                 step="0.01"
                 placeholder="e.g., 310"
+                disabled={isCalculating}
               />
             </div>
           </div>
           <div className="flex space-x-4">
-            <Button type="submit">Calculate Average</Button>
-            <Button type="button" variant="outline" onClick={onReset}>
-              Reset
-            </Button>
+            <TooltipHelper content="Calculate your new weighted average price after the additional purchase">
+              <Button type="submit" disabled={isCalculating}>
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Calculating...
+                  </>
+                ) : (
+                  "Calculate Average"
+                )}
+              </Button>
+            </TooltipHelper>
+            <TooltipHelper content="Clear all fields and start over">
+              <Button type="button" variant="outline" onClick={onReset} disabled={isCalculating}>
+                Reset
+              </Button>
+            </TooltipHelper>
           </div>
         </form>
       </CardContent>

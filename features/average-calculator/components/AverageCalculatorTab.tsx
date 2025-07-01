@@ -5,7 +5,7 @@ import { AverageResultsDisplay } from "./AverageResultsDisplay"
 import { useAverageCalculator } from "../hooks/useAverageCalculator"
 
 export function AverageCalculatorTab() {
-  const { inputs, results, handleInputChange, handleSubmit, handleReset } = useAverageCalculator()
+  const { inputs, results, isCalculating, handleInputChange, handleSubmit, handleReset } = useAverageCalculator()
 
   return (
     <>
@@ -14,6 +14,7 @@ export function AverageCalculatorTab() {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         onReset={handleReset}
+        isCalculating={isCalculating}
       />
       {results && <AverageResultsDisplay results={results} />}
     </>

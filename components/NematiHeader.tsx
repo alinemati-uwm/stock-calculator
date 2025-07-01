@@ -39,7 +39,7 @@ export function NematiHeader() {
         {/* Right side - Copyright and Version */}
         <div className="flex flex-col sm:flex-row items-center gap-2 text-xs text-gray-400">
           <span className="whitespace-nowrap">©2024 Nemati AI Inc. — Milwaukee, WI, USA</span>
-          <span className="whitespace-nowrap">0.0.2 Updated on 2025-06-13</span>
+          <span className="whitespace-nowrap">0.0.56 Updated on 2025-06-13</span>
         </div>
       </div>
     </header>

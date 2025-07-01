@@ -1,9 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import type { PercentageInputs, PercentageResults } from "../types"
+import { useNotificationContext } from "../../../shared/providers/notification-provider"
+import {
+  validateRequiredFields,
+  formatValidationMessage,
+  validateNumericFields,
+} from "../../../shared/utils/validation"
 
 export function usePercentageCalculator() {
   const [inputs, setInputs] = useState<PercentageInputs>({
@@ -11,7 +16,8 @@ export function usePercentageCalculator() {
     finalValue: "",
   })
   const [results, setResults] = useState<PercentageResults | null>(null)
-  const [showToast, setShowToast] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
+  const { calculationSuccess, error: showError, formReset, warning } = useNotificationContext()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -23,16 +29,63 @@ export function usePercentageCalculator() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputs.initialValue === "" || inputs.finalValue === "") {
-      alert("Please fill in both values before calculating.")
+
+    if (isCalculating) return
+
+    setIsCalculating(true)
+
+    // Validate required fields
+    const missingFields = validateRequiredFields(inputs)
+    if (missingFields.length > 0) {
+      const errorMsg = formatValidationMessage(missingFields)
+      showError("Validation Error", errorMsg)
+      setIsCalculating(false)
       return
     }
 
-    const initialValue = Number(inputs.initialValue)
-    const finalValue = Number(inputs.finalValue)
-    const percentageChange = ((finalValue - initialValue) / initialValue) * 100
+    // Validate numeric fields
+    const invalidFields = validateNumericFields(inputs)
+    if (invalidFields.length > 0) {
+      const errorMsg = `Please enter valid numbers for: ${invalidFields.join(", ")}`
+      showError("Invalid Input", errorMsg)
+      setIsCalculating(false)
+      return
+    }
 
-    setResults({ initialValue, finalValue, percentageChange })
+    try {
+      const initialValue = Number(inputs.initialValue)
+      const finalValue = Number(inputs.finalValue)
+
+      if (initialValue === 0) {
+        showError("Division by Zero", "Initial value cannot be zero for percentage calculation.")
+        setIsCalculating(false)
+        return
+      }
+
+      const percentageChange = ((finalValue - initialValue) / initialValue) * 100
+
+      if (Math.abs(percentageChange) > 1000) {
+        warning(
+          "Large Percentage Change",
+          "The calculated percentage change is very large. Please verify your input values.",
+        )
+      }
+
+      const calculatedResults = { initialValue, finalValue, percentageChange }
+      setResults(calculatedResults)
+
+      const isIncrease = percentageChange >= 0
+      const changeType = isIncrease ? "Increase" : "Decrease"
+
+      calculationSuccess(
+        "Percentage Change Calculation",
+        `${changeType} of ${Math.abs(percentageChange).toFixed(2)}% from ${initialValue} to ${finalValue}`,
+      )
+    } catch (err) {
+      showError("Calculation Error", "An error occurred while calculating percentage change. Please check your inputs.")
+    } finally {
+      setIsCalculating(false)
+    }
   }
 
   const handleReset = () => {
@@ -41,14 +94,14 @@ export function usePercentageCalculator() {
       finalValue: "",
     })
     setResults(null)
-    setShowToast(true)
-    setTimeout(() => setShowToast(false), 3000)
+    setIsCalculating(false)
+    formReset()
   }
 
   return {
     inputs,
     results,
-    showToast,
+    isCalculating,
     handleInputChange,
     handleSubmit,
     handleReset,
